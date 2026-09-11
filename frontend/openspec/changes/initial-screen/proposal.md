@@ -24,4 +24,4 @@ The chat app has no frontend yet — `chatApp/` is still the Vite starter templa
 - **Code**: `frontend/chatApp/src/App.tsx` rewritten; new `frontend/chatApp/src/api/auth.ts`, `src/pages/LoginPage.tsx`, `src/pages/AppShell.tsx`; replaced `index.css`/`App.css`; `frontend/chatApp/vite.config.ts` gains a proxy.
 - **Dependencies**: none added (`fetch`, `localStorage` only). Starter assets (`hero.png`, `react.svg`, `vite.svg`) become unused.
 - **Backend API**: consumed as-is; no backend changes. Relevant endpoints: `POST /api/v1/login` (200/401), `POST /api/v1/signup` (201/409), `GET /api/v1/data` (Bearer, 200/401).
-- **Ops**: requires backend running on port 5001.
+- **Ops**: requires the backend running on its script default port 3000 (its README's 5001 is only what the `-p` flag selects).

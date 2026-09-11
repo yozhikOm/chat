@@ -23,7 +23,7 @@ The three endpoints are trivial. `axios`, a state store, and a router would add 
 - Considered: `axios` (rejected - one extra dep for one screen), `zustand`/Redux (rejected - single branch of UI state, React `useState` suffices).
 
 ### 2. Vite dev proxy `/api` -> backend
-`vite.config.ts` gains `server.proxy: { '/api': 'http://localhost:5001' }`. The frontend calls relative URLs (`/api/v1/login`) — no env juggling, no CORS concerns, and the same origin serves static assets now, which later allows `/socket.io` proxying (`ws: true`) for real-time chat with a one-line config change.
+`vite.config.ts` gains `server.proxy: { '/api': 'http://localhost:3000' }` (overridable via `VITE_API_PROXY`). The frontend calls relative URLs (`/api/v1/login`) — no env juggling, no CORS concerns, and the same origin serves static assets now, which later allows `/socket.io` proxying (`ws: true`) for real-time chat with a one-line config change. The default target is `3000` because the backend's own `npm start` script passes no `-p` flag, so fastify-cli binds its default port (3000); the 5001 advertised in the backend README is only what the `-p` option would select, not what `make start` actually produces.
 - Considered: direct calls to `http://localhost:5001` via an env `VITE_API_URL` (rejected - CORS is open today but hardcoding a dev origin pollutes prod builds).
 
 ### 3. Session shape and startup flow
