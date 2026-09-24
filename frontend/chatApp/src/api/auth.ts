@@ -9,10 +9,17 @@ export type Channel = {
   removable: boolean
 }
 
+export type Message = {
+  id: number
+  body: string
+  channelId: number
+  username: string
+}
+
 export type InitialData = {
   channels: Channel[]
   currentChannelId: number
-  messages: unknown[]
+  messages: Message[]
 }
 
 export class AuthError extends Error {

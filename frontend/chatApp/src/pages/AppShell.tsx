@@ -1,6 +1,11 @@
 import { useEffect, useState } from 'react'
 import { AuthError, fetchData } from '../api/auth'
 import type { InitialData } from '../api/auth'
+import { connect, disconnect } from '../api/socket'
+import { useChatStore } from '../store/chat'
+import MessagePane from '../components/MessagePane'
+import MessageInput from '../components/MessageInput'
+import ChannelList from '../components/ChannelList'
 
 type AppShellProps = {
   token: string
@@ -11,6 +16,8 @@ type AppShellProps = {
 function AppShell({ token, username, onLogout }: AppShellProps) {
   const [data, setData] = useState<InitialData | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const connected = useChatStore((state) => state.connected)
+  const activeChannel = useChatStore((state) => state.activeChannelId)
 
   useEffect(() => {
     let cancelled = false
@@ -19,6 +26,8 @@ function AppShell({ token, username, onLogout }: AppShellProps) {
       .then((result) => {
         if (cancelled) return
         setData(result)
+        useChatStore.getState().initFromServer(result)
+        connect()
       })
       .catch((err) => {
         if (cancelled) return
@@ -31,6 +40,7 @@ function AppShell({ token, username, onLogout }: AppShellProps) {
 
     return () => {
       cancelled = true
+      disconnect()
     }
   }, [token, onLogout])
 
@@ -42,22 +52,24 @@ function AppShell({ token, username, onLogout }: AppShellProps) {
           Выйти
         </button>
       </div>
+      {!connected && (
+        <div className="connection-banner">Нет соединения с сервером</div>
+      )}
       {error ? (
         <div className="app-error">{error}</div>
       ) : data ? (
         <div className="app-body">
-          <nav className="channel-list">
-            <h3>Каналы</h3>
-            {data.channels.map((channel) => (
-              <div
-                key={channel.id}
-                className={`channel-item${channel.id === data.currentChannelId ? ' active' : ''}`}
-              >
-                # {channel.name}
-              </div>
-            ))}
-          </nav>
-          <div className="message-pane">Сообщения появятся здесь</div>
+          <ChannelList />
+          <div className="message-area">
+            {activeChannel != null ? (
+              <>
+                <MessagePane />
+                <MessageInput username={username} />
+              </>
+            ) : (
+              <div className="message-pane">Нет активного канала</div>
+            )}
+          </div>
         </div>
       ) : (
         <div className="app-error">Загрузка…</div>
