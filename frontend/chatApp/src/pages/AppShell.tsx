@@ -1,48 +1,53 @@
-import { useEffect, useState } from 'react'
-import { AuthError, fetchData } from '../api/auth'
-import type { InitialData } from '../api/auth'
-import { connect, disconnect } from '../api/socket'
-import { useChatStore } from '../store/chat'
-import MessagePane from '../components/MessagePane'
-import MessageInput from '../components/MessageInput'
-import ChannelList from '../components/ChannelList'
+import { useEffect, useState } from 'react';
+import type React from 'react';
+import { AuthError, fetchData } from '../api/auth';
+import type { IInitialData } from '../api/auth';
+import { connect, disconnect } from '../api/socket';
+import { useChatStore } from '../store/chat';
+import MessagePane from '../components/MessagePane';
+import MessageInput from '../components/MessageInput';
+import ChannelList from '../components/ChannelList';
 
-type AppShellProps = {
-  token: string
-  username: string
-  onLogout: () => void
+interface IAppShellProps {
+  token: string;
+  username: string;
+  onLogout: () => void;
 }
 
-function AppShell({ token, username, onLogout }: AppShellProps) {
-  const [data, setData] = useState<InitialData | null>(null)
-  const [error, setError] = useState<string | null>(null)
-  const connected = useChatStore((state) => state.connected)
-  const activeChannel = useChatStore((state) => state.activeChannelId)
+const AppShell: React.FunctionComponent<IAppShellProps> = ({
+  token,
+  username,
+  onLogout,
+}: IAppShellProps) => {
+  const [data, setData] = useState<IInitialData | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const connected = useChatStore((state) => state.connected);
+  const activeChannel = useChatStore((state) => state.activeChannelId);
 
   useEffect(() => {
-    let cancelled = false
+    let cancelled = false;
 
     fetchData(token)
       .then((result) => {
-        if (cancelled) return
-        setData(result)
-        useChatStore.getState().initFromServer(result)
-        connect()
+        if (cancelled) return;
+        setData(result);
+        useChatStore.getState().initFromServer(result);
+        connect();
       })
       .catch((err) => {
-        if (cancelled) return
+        if (cancelled) return;
         if (err instanceof AuthError && err.statusCode === 401) {
-          onLogout()
+          onLogout();
         } else {
-          setError('Не удалось связаться с сервером. Попробуйте ещё раз.')
+          setError('Не удалось связаться с сервером. Попробуйте ещё раз.');
         }
-      })
+      });
 
     return () => {
-      cancelled = true
-      disconnect()
-    }
-  }, [token, onLogout])
+      cancelled = true;
+      disconnect();
+    };
+  }, [token, onLogout]);
 
   return (
     <div className="app-shell">
@@ -75,7 +80,7 @@ function AppShell({ token, username, onLogout }: AppShellProps) {
         <div className="app-error">Загрузка…</div>
       )}
     </div>
-  )
-}
+  );
+};
 
-export default AppShell
+export default AppShell;

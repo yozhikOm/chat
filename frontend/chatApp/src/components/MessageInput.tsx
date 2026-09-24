@@ -1,53 +1,56 @@
-import { useState } from 'react'
-import type { FormEvent } from 'react'
-import { emitMessage } from '../api/socket'
-import { useChatStore } from '../store/chat'
+import { useState } from 'react';
+import type React from 'react';
+import type { FormEvent } from 'react';
+import { emitMessage } from '../api/socket';
+import { useChatStore } from '../store/chat';
 
-const MESSAGE_MAX = 500
+const MESSAGE_MAX = 500;
 
-type MessageInputProps = {
-  username: string
+interface IMessageInputProps {
+  username: string;
 }
 
-function MessageInput({ username }: MessageInputProps) {
-  const activeChannelId = useChatStore((state) => state.activeChannelId)
-  const [text, setText] = useState('')
-  const [error, setError] = useState<string | null>(null)
-  const [sending, setSending] = useState(false)
+const MessageInput: React.FunctionComponent<IMessageInputProps> = ({
+  username,
+}: IMessageInputProps) => {
+  const activeChannelId = useChatStore((state) => state.activeChannelId);
+  const [text, setText] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [sending, setSending] = useState(false);
 
   const validate = (value: string): string | null => {
-    if (value.trim() === '') return 'Сообщение не должно быть пустым'
+    if (value.trim() === '') return 'Сообщение не должно быть пустым';
     if (value.length > MESSAGE_MAX)
-      return `Сообщение слишком длинное (максимум ${MESSAGE_MAX} символов)`
-    return null
-  }
+      return `Сообщение слишком длинное (максимум ${MESSAGE_MAX} символов)`;
+    return null;
+  };
 
   const handleSubmit = (event: FormEvent) => {
-    event.preventDefault()
+    event.preventDefault();
 
-    if (activeChannelId == null) return
+    if (activeChannelId == null) return;
 
-    const validationError = validate(text)
+    const validationError = validate(text);
     if (validationError) {
-      setError(validationError)
-      return
+      setError(validationError);
+      return;
     }
 
-    setError(null)
-    setSending(true)
+    setError(null);
+    setSending(true);
 
     emitMessage(
       { body: text.trim(), channelId: activeChannelId, username },
       (response) => {
-        setSending(false)
+        setSending(false);
         if (response.status !== 'ok') {
-          setError('Не удалось отправить сообщение')
-          return
+          setError('Не удалось отправить сообщение');
+          return;
         }
-        setText('')
+        setText('');
       },
-    )
-  }
+    );
+  };
 
   return (
     <form className="message-input-form" onSubmit={handleSubmit}>
@@ -60,8 +63,8 @@ function MessageInput({ username }: MessageInputProps) {
           value={text}
           maxLength={MESSAGE_MAX}
           onChange={(e) => {
-            setText(e.target.value)
-            if (error) setError(null)
+            setText(e.target.value);
+            if (error) setError(null);
           }}
         />
         <button type="submit" className="send-btn" disabled={sending}>
@@ -69,7 +72,7 @@ function MessageInput({ username }: MessageInputProps) {
         </button>
       </div>
     </form>
-  )
-}
+  );
+};
 
-export default MessageInput
+export default MessageInput;

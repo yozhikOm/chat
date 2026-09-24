@@ -1,37 +1,38 @@
-import { useState } from 'react'
-import { emitRemoveChannel } from '../api/socket'
-import type { Channel } from '../api/auth'
-import { useChatStore } from '../store/chat'
-import Modal from './Modal'
-import ChannelModal from './ChannelModal'
+import { useState } from 'react';
+import type React from 'react';
+import { emitRemoveChannel } from '../api/socket';
+import type { IChannel } from '../api/auth';
+import { useChatStore } from '../store/chat';
+import Modal from './Modal';
+import ChannelModal from './ChannelModal';
 
 type DialogState =
   | { kind: 'create' }
-  | { kind: 'rename'; channel: Channel }
-  | { kind: 'remove'; channel: Channel }
-  | null
+  | { kind: 'rename'; channel: IChannel }
+  | { kind: 'remove'; channel: IChannel }
+  | null;
 
-function ChannelList() {
-  const channels = useChatStore((state) => state.channels)
-  const activeChannelId = useChatStore((state) => state.activeChannelId)
-  const setActiveChannel = useChatStore((state) => state.setActiveChannel)
-  const [dialog, setDialog] = useState<DialogState>(null)
-  const [removeError, setRemoveError] = useState<string | null>(null)
-  const [removing, setRemoving] = useState(false)
+const ChannelList: React.FunctionComponent = () => {
+  const channels = useChatStore((state) => state.channels);
+  const activeChannelId = useChatStore((state) => state.activeChannelId);
+  const setActiveChannel = useChatStore((state) => state.setActiveChannel);
+  const [dialog, setDialog] = useState<DialogState>(null);
+  const [removeError, setRemoveError] = useState<string | null>(null);
+  const [removing, setRemoving] = useState(false);
 
   const handleRemove = () => {
-    if (dialog?.kind !== 'remove') return
-    setRemoveError(null)
-    setRemoving(true)
+    if (dialog?.kind !== 'remove') return;
+    setRemoveError(null);
+    setRemoving(true);
     emitRemoveChannel({ id: dialog.channel.id }, (response) => {
-      setRemoving(false)
+      setRemoving(false);
       if (response.status !== 'ok') {
-        setRemoveError('Не удалось удалить канал')
-        return
+        setRemoveError('Не удалось удалить канал');
+        return;
       }
-      setDialog(null)
-    })
-  }
+      setDialog(null);
+    });
+  };
 
   return (
     <>
@@ -109,7 +110,7 @@ function ChannelList() {
         </Modal>
       )}
     </>
-  )
-}
+  );
+};
 
-export default ChannelList
+export default ChannelList;

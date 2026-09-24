@@ -1,12 +1,13 @@
-import { useEffect, useMemo, useRef } from 'react'
-import { useChatStore } from '../store/chat'
+import { useEffect, useMemo, useRef } from 'react';
+import type React from 'react';
+import { useChatStore } from '../store/chat';
 
-const NEAR_BOTTOM_THRESHOLD = 40
+const NEAR_BOTTOM_THRESHOLD = 40;
 
-function MessagePane() {
-  const messages = useChatStore((state) => state.messages)
-  const activeChannelId = useChatStore((state) => state.activeChannelId)
-  const containerRef = useRef<HTMLDivElement>(null)
+const MessagePane: React.FunctionComponent = () => {
+  const messages = useChatStore((state) => state.messages);
+  const activeChannelId = useChatStore((state) => state.activeChannelId);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const channelMessages = useMemo(
     () =>
@@ -14,20 +15,20 @@ function MessagePane() {
         .filter((m) => m.channelId === activeChannelId)
         .sort((a, b) => a.id - b.id),
     [messages, activeChannelId],
-  )
+  );
 
   useEffect(() => {
-    const container = containerRef.current
-    if (!container) return
+    const container = containerRef.current;
+    if (!container) return;
 
     const nearBottom =
       container.scrollHeight - container.scrollTop - container.clientHeight <
-      NEAR_BOTTOM_THRESHOLD
+      NEAR_BOTTOM_THRESHOLD;
 
     if (nearBottom) {
-      container.scrollTop = container.scrollHeight
+      container.scrollTop = container.scrollHeight;
     }
-  }, [channelMessages.length])
+  }, [channelMessages.length]);
 
   return (
     <div className="message-pane" ref={containerRef}>
@@ -38,7 +39,7 @@ function MessagePane() {
         </div>
       ))}
     </div>
-  )
-}
+  );
+};
 
-export default MessagePane
+export default MessagePane;

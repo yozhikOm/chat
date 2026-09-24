@@ -1,70 +1,72 @@
-export type AuthResponse = {
-  token: string
-  username: string
+interface IAuthResponse {
+  token: string;
+  username: string;
 }
 
-export type Channel = {
-  id: number
-  name: string
-  removable: boolean
+interface IChannel {
+  id: number;
+  name: string;
+  removable: boolean;
 }
 
-export type Message = {
-  id: number
-  body: string
-  channelId: number
-  username: string
+interface IMessage {
+  id: number;
+  body: string;
+  channelId: number;
+  username: string;
 }
 
-export type InitialData = {
-  channels: Channel[]
-  currentChannelId: number
-  messages: Message[]
+interface IInitialData {
+  channels: IChannel[];
+  currentChannelId: number;
+  messages: IMessage[];
 }
 
 export class AuthError extends Error {
-  statusCode: number
+  statusCode: number;
 
   constructor(statusCode: number, message: string) {
-    super(message)
-    this.name = 'AuthError'
-    this.statusCode = statusCode
+    super(message);
+    this.name = 'AuthError';
+    this.statusCode = statusCode;
   }
 }
 
 const request = async <T>(path: string, options?: RequestInit): Promise<T> => {
-  let response: Response
+  let response: Response;
   try {
-    response = await fetch(path, options)
+    response = await fetch(path, options);
   } catch {
-    throw new AuthError(0, 'network')
+    throw new AuthError(0, 'network');
   }
 
-  const data = (await response.json().catch(() => null)) as T | null
+  const data = (await response.json().catch(() => null)) as T | null;
   if (!response.ok) {
-    throw new AuthError(response.status, response.statusText)
+    throw new AuthError(response.status, response.statusText);
   }
   if (data === null) {
-    throw new AuthError(0, 'network')
+    throw new AuthError(0, 'network');
   }
-  return data
-}
+  return data;
+};
 
-export const login = (username: string, password: string): Promise<AuthResponse> =>
-  request<AuthResponse>('/api/v1/login', {
+export const login = (username: string, password: string): Promise<IAuthResponse> =>
+  request<IAuthResponse>('/api/v1/login', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ username, password }),
-  })
+  });
 
-export const signup = (username: string, password: string): Promise<AuthResponse> =>
-  request<AuthResponse>('/api/v1/signup', {
+export const signup = (username: string, password: string): Promise<IAuthResponse> =>
+  request<IAuthResponse>('/api/v1/signup', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ username, password }),
-  })
+  });
 
-export const fetchData = (token: string): Promise<InitialData> =>
-  request<InitialData>('/api/v1/data', {
+export const fetchData = (token: string): Promise<IInitialData> =>
+  request<IInitialData>('/api/v1/data', {
     headers: { Authorization: `Bearer ${token}` },
-  })
+  });
+
+export type { IAuthResponse, IChannel, IInitialData, IMessage };

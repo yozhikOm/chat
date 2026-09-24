@@ -1,103 +1,118 @@
-import { io, Socket } from 'socket.io-client'
-import type { Channel, Message } from '../api/auth'
-import { useChatStore } from '../store/chat'
+import { io } from 'socket.io-client';
+import type { Socket } from 'socket.io-client';
+import type { IChannel, IMessage } from '../api/auth';
+import { useChatStore } from '../store/chat';
 
-const ACK_TIMEOUT = 3000
+const ACK_TIMEOUT = 3000;
 
-type AckResponse = { status: string; data?: Channel }
-
-const withAckTimeout = <T extends AckResponse>(
-  ack?: (response: T) => void,
-) => {
-  if (!ack) return undefined
-  let done = false
-  const timer = setTimeout(() => {
-    if (done) return
-    done = true
-    ack({ status: 'timeout' } as T)
-  }, ACK_TIMEOUT)
-  const callback = (response: T) => {
-    if (done) return
-    done = true
-    clearTimeout(timer)
-    ack(response)
-  }
-  return callback
+interface IAckResponse {
+  status: string;
+  data?: IChannel;
 }
 
-let socket: Socket | null = null
+const withAckTimeout = <T extends IAckResponse>(
+  ack?: (response: T) => void,
+): ((response: T) => void) | undefined => {
+  if (!ack) return undefined;
+  let done = false;
+  const timer = setTimeout(() => {
+    if (done) return;
+    done = true;
+    ack({ status: 'timeout' } as T);
+  }, ACK_TIMEOUT);
+  const callback = (response: T) => {
+    if (done) return;
+    done = true;
+    clearTimeout(timer);
+    ack(response);
+  };
+  return callback;
+};
 
-export const getSocket = () => socket
+let socket: Socket | null = null;
+
+export const getSocket = () => socket;
 
 export const connect = () => {
-  if (socket?.connected) return socket
+  if (socket?.connected) return socket;
 
-  socket = io('/', { autoConnect: true })
+  socket = io('/', { autoConnect: true });
 
-  socket.on('connect', () => useChatStore.getState().setConnected(true))
-  socket.on('disconnect', () => useChatStore.getState().setConnected(false))
+  socket.on('connect', () => useChatStore.getState().setConnected(true));
+  socket.on('disconnect', () => useChatStore.getState().setConnected(false));
 
-  socket.on('newMessage', (message: Message) => {
-    useChatStore.getState().addMessage(message)
-  })
+  socket.on('newMessage', (message: IMessage) => {
+    useChatStore.getState().addMessage(message);
+  });
 
-  socket.on('newChannel', (channel: Channel) => {
-    useChatStore.getState().addChannel(channel)
-  })
+  socket.on('newChannel', (channel: IChannel) => {
+    useChatStore.getState().addChannel(channel);
+  });
 
   socket.on('removeChannel', ({ id }: { id: number }) => {
-    useChatStore.getState().removeChannel(id)
-  })
+    useChatStore.getState().removeChannel(id);
+  });
 
-  socket.on('renameChannel', (channel: Channel) => {
-    useChatStore.getState().renameChannel(channel)
-  })
+  socket.on('renameChannel', (channel: IChannel) => {
+    useChatStore.getState().renameChannel(channel);
+  });
 
-  return socket
-}
+  return socket;
+};
 
 export const disconnect = () => {
-  if (!socket) return
-  socket.removeAllListeners()
-  socket.disconnect()
-  socket = null
-  useChatStore.getState().setConnected(false)
-}
+  if (!socket) return;
+  socket.removeAllListeners();
+  socket.disconnect();
+  socket = null;
+  useChatStore.getState().setConnected(false);
+};
 
-export type MessagePayload = {
-  body: string
-  channelId: number
-  username: string
+interface IMessagePayload {
+  body: string;
+  channelId: number;
+  username: string;
 }
 
 export const emitMessage = (
-  payload: MessagePayload,
+  payload: IMessagePayload,
   ack?: (response: { status: string }) => void,
 ) => {
-  socket?.emit('newMessage', payload, withAckTimeout(ack))
+  socket?.emit('newMessage', payload, withAckTimeout(ack));
+};
+
+interface IChannelNamePayload {
+  name: string;
 }
 
-export type ChannelNamePayload = { name: string }
-
 export const emitNewChannel = (
-  payload: ChannelNamePayload,
-  ack?: (response: { status: string; data: Channel }) => void,
+  payload: IChannelNamePayload,
+  ack?: (response: { status: string; data: IChannel }) => void,
 ) => {
-  socket?.emit('newChannel', payload, withAckTimeout(ack))
+  socket?.emit('newChannel', payload, withAckTimeout(ack));
+};
+
+interface IRemoveChannelPayload {
+  id: number;
 }
 
 export const emitRemoveChannel = (
-  payload: { id: number },
+  payload: IRemoveChannelPayload,
   ack?: (response: { status: string }) => void,
 ) => {
-  socket?.emit('removeChannel', payload, withAckTimeout(ack))
-}
+  socket?.emit('removeChannel', payload, withAckTimeout(ack));
+};
 
-export type RenameChannelPayload = { id: number; name: string }
+interface IRenameChannelPayload {
+  id: number;
+  name: string;
+}
 
 export const emitRenameChannel = (
-  payload: RenameChannelPayload,
+  payload: IRenameChannelPayload,
   ack?: (response: { status: string }) => void,
 ) => {
-  socket?.emit('renameChannel', payload, withAckTimeout(ack))
-}
+  socket?.emit('renameChannel', payload, withAckTimeout(ack));
+};
+
+export type { IAckResponse, IChannelNamePayload, IMessagePayload, IRemoveChannelPayload, IRenameChannelPayload };

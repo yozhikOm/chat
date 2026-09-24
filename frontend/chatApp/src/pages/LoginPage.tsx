@@ -1,50 +1,53 @@
-import { useState } from 'react'
-import type { FormEvent } from 'react'
-import { AuthError, login, signup } from '../api/auth'
+import { useState } from 'react';
+import type React from 'react';
+import type { FormEvent } from 'react';
+import { AuthError, login, signup } from '../api/auth';
 
-type Tab = 'login' | 'signup'
+type Tab = 'login' | 'signup';
 
-type LoginPageProps = {
-  onAuth: (token: string, username: string) => void
+interface ILoginPageProps {
+  onAuth: (token: string, username: string) => void;
 }
 
 const ERROR_MESSAGES: Record<number, string> = {
   401: 'Неверное имя пользователя или пароль',
   409: 'Такой пользователь уже существует',
-}
+};
 
-function LoginPage({ onAuth }: LoginPageProps) {
-  const [tab, setTab] = useState<Tab>('login')
-  const [username, setUsername] = useState('')
-  const [password, setPassword] = useState('')
-  const [error, setError] = useState<string | null>(null)
-  const [loading, setLoading] = useState(false)
+const LoginPage: React.FunctionComponent<ILoginPageProps> = ({
+  onAuth,
+}: ILoginPageProps) => {
+  const [tab, setTab] = useState<Tab>('login');
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (event: FormEvent) => {
-    event.preventDefault()
+    event.preventDefault();
 
     if (username.trim() === '' || password === '') {
-      setError('Введите имя пользователя и пароль')
-      return
+      setError('Введите имя пользователя и пароль');
+      return;
     }
 
-    setLoading(true)
-    setError(null)
+    setLoading(true);
+    setError(null);
 
     try {
-      const request = tab === 'login' ? login : signup
-      const response = await request(username.trim(), password)
-      onAuth(response.token, response.username)
+      const request = tab === 'login' ? login : signup;
+      const response = await request(username.trim(), password);
+      onAuth(response.token, response.username);
     } catch (err) {
       if (err instanceof AuthError) {
-        setError(ERROR_MESSAGES[err.statusCode] ?? 'Не удалось связаться с сервером')
+        setError(ERROR_MESSAGES[err.statusCode] ?? 'Не удалось связаться с сервером');
       } else {
-        setError('Не удалось связаться с сервером')
+        setError('Не удалось связаться с сервером');
       }
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <div className="login-page">
@@ -55,8 +58,8 @@ function LoginPage({ onAuth }: LoginPageProps) {
             type="button"
             className={tab === 'login' ? 'active' : ''}
             onClick={() => {
-              setTab('login')
-              setError(null)
+              setTab('login');
+              setError(null);
             }}
           >
             Вход
@@ -65,8 +68,8 @@ function LoginPage({ onAuth }: LoginPageProps) {
             type="button"
             className={tab === 'signup' ? 'active' : ''}
             onClick={() => {
-              setTab('signup')
-              setError(null)
+              setTab('signup');
+              setError(null);
             }}
           >
             Регистрация
@@ -102,7 +105,7 @@ function LoginPage({ onAuth }: LoginPageProps) {
         </form>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default LoginPage
+export default LoginPage;

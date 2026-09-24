@@ -1,22 +1,23 @@
-import { create } from 'zustand'
-import type { Channel, InitialData, Message } from '../api/auth'
+import { create } from 'zustand';
+import type { IChannel, IInitialData, IMessage } from '../api/auth';
 
-export type ChatState = {
-  channels: Channel[]
-  messages: Message[]
-  activeChannelId: number | null
-  connected: boolean
+interface IChatState {
+  channels: IChannel[];
+  messages: IMessage[];
+  activeChannelId: number | null;
+  connected: boolean;
 
-  initFromServer: (data: InitialData) => void
-  setActiveChannel: (id: number) => void
-  addChannel: (channel: Channel) => void
-  removeChannel: (id: number) => void
-  renameChannel: (channel: Channel) => void
-  addMessage: (message: Message) => void
-  setConnected: (v: boolean) => void
+  initFromServer: (data: IInitialData) => void;
+  setActiveChannel: (id: number) => void;
+  addChannel: (channel: IChannel) => void;
+  removeChannel: (id: number) => void;
+  renameChannel: (channel: IChannel) => void;
+  addMessage: (message: IMessage) => void;
+  removeMessage: (id: number) => void;
+  setConnected: (v: boolean) => void;
 }
 
-export const useChatStore = create<ChatState>((set) => ({
+export const useChatStore = create<IChatState>((set) => ({
   channels: [],
   messages: [],
   activeChannelId: null,
@@ -36,13 +37,13 @@ export const useChatStore = create<ChatState>((set) => ({
 
   removeChannel: (id) =>
     set((state) => {
-      const channels = state.channels.filter((c) => c.id !== id)
-      const messages = state.messages.filter((m) => m.channelId !== id)
+      const channels = state.channels.filter((c) => c.id !== id);
+      const messages = state.messages.filter((m) => m.channelId !== id);
       const activeChannelId =
         state.activeChannelId === id
           ? (channels[0]?.id ?? null)
-          : state.activeChannelId
-      return { channels, messages, activeChannelId }
+          : state.activeChannelId;
+      return { channels, messages, activeChannelId };
     }),
 
   renameChannel: (channel) =>
@@ -56,6 +57,7 @@ export const useChatStore = create<ChatState>((set) => ({
     set((state) => ({
       messages: [...state.messages, message],
     })),
+
   // Удаление сообщений
   removeMessage: (id) =>
     set((state) => ({
@@ -63,4 +65,6 @@ export const useChatStore = create<ChatState>((set) => ({
     })),
 
   setConnected: (v) => set({ connected: v }),
-}))
+}));
+
+export type { IChatState };

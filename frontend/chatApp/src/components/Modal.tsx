@@ -1,18 +1,19 @@
-import type { ReactNode } from 'react'
+import type React from 'react';
+import type { ReactNode } from 'react';
 
-type ModalProps = {
-  title: string
-  children: ReactNode
-  confirmLabel: string
-  cancelLabel?: string
-  onSubmit: () => void
-  onClose: () => void
-  danger?: boolean
-  disabled?: boolean
-  error?: string | null
+interface IModalProps {
+  title: string;
+  children: ReactNode;
+  confirmLabel: string;
+  cancelLabel?: string;
+  onSubmit: () => void;
+  onClose: () => void;
+  danger?: boolean;
+  disabled?: boolean;
+  error?: string | null;
 }
 
-function Modal({
+const Modal: React.FunctionComponent<IModalProps> = ({
   title,
   children,
   confirmLabel,
@@ -22,7 +23,7 @@ function Modal({
   danger = false,
   disabled = false,
   error = null,
-}: ModalProps) {
+}: IModalProps) => {
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div
@@ -49,7 +50,7 @@ function Modal({
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Modal
+export default Modal;
